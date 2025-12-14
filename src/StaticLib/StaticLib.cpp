@@ -58,30 +58,89 @@ static node* generate(int key, const char* value)
 // keyの値を見てノードを追加する
 bool add(tree* t, int key, const char* value)
 {
-	if (t == NULL) return false;
+    if (t == NULL) return false;
 
-	node* p = generate(key, value);
-	if (p == NULL) return false;// メモリ確保できなかった。
+    node* p = generate(key, value); 
+    if (p == NULL) return false;
 
-	if (t->root == NULL) {
-		t->root = p;
-		return true;
-	}
+    if (t->root == NULL) {
+        t->root = p;
+        return true;
+    }
 
-	// Todo: t->rootの下にkeyの値の大小でleftかrightを切り替えながらpを追加する処理を実装する
+    node* current = t->root;
+    node* parent = NULL;
 
-	return true;
+    while (current != NULL) {
+        parent = current;
+
+        if (key < current->key) {
+            current = current->left;
+        }
+        else if (key > current->key) {
+            current = current->right;
+        }
+        else {
+
+            memcpy(current->value, p->value, strlen(p->value) + 1);
+
+            free(p);
+            return true; 
+        }
+    }
+
+    if (key < parent->key) {
+        parent->left = p;
+    }
+    else {
+        parent->right = p;
+    }
+
+    return true;
 }
 
 // keyの値を見てノードを検索して、値を取得する
 const char* find(const tree* t, int key)
 {
-	// ToDo: 実装する
-	return NULL;
+    if (t == NULL || t->root == NULL) return NULL;
+
+
+    node* current = t->root;
+
+    while (current != NULL) {
+        if (key == current->key) {
+        
+            return current->value;
+        }
+        else if (key < current->key) {
+         
+            current = current->left;
+        }
+        else {
+         
+            current = current->right;
+        }
+    }
+
+    return NULL;
+}
+
+static void search_recursive(const node* n, void (*func)(const node* p))
+{
+    if (n == NULL) return;
+
+    search_recursive(n->left, func);
+
+    func(n);
+
+    search_recursive(n->right, func);
 }
 
 // keyの小さな順にコールバック関数funcを呼び出す
 void search(const tree* t, void (*func)(const node* p))
 {
-	// ToDo: 実装する
+    if (t == NULL || t->root == NULL) return;
+
+
+    search_recursive(t->root, func);
 }
